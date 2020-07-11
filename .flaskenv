@@ -1,0 +1,3 @@
+FLASK_APP=qc_module.py
+FLASK_DEBUG=True
+FLASK_RUN_HOST=0.0.0.0

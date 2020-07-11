@@ -1,0 +1,749 @@
+{% extends 'layout.html' %}
+
+  <script>
+    $( document ).ready(function() {
+
+      $('#save_as_pdf').click(function () {
+        window.print();
+      });
+
+      $("#lookup").click(function(){
+        var recording_id = $("#recording_id").val();
+        
+        $.ajax({
+          type: 'POST',
+          url: '/lookup',
+          data: {'recording_id' : recording_id},
+          dataType: 'json',
+          success: function(data) {
+            document.title = data[0]['user']+"_"+data[0]['lead_id']+"_"+recording_id;
+            var recording_location = data[0]['location'];
+            $("#evalulation_start_time").val(data[0]['eval_time']);
+            $("#lead_id").val(data[0]['lead_id']);
+            $("#recording_url").val(recording_location);
+            $("#customer_first_name").val(data[0]['first_name']);
+            $("#customer_last_name").val(data[0]['last_name']);
+            $("#audio_controls_div").append("<audio controls><source id='recording_location' src='"+recording_location+"' type='audio/mpeg'></audio>")
+            $("#customer_phone").val(data[0]['phone_number']);
+            $("#call_datetime").val(data[0]['start_time']);
+            $("#sales_agent").val(data[0]['user']);
+
+          }
+        });
+      });
+      $('#total_score').prop('readonly', true);
+      $(":radio").change(function(){
+        var total_score = 0;
+        $(":radio").each(function() {
+          if ($(this).is(':checked')) {
+            total_score = parseInt($(this).val()) + parseInt(total_score);
+          }
+          $("#total_score").val(total_score);
+        });
+      });
+    });
+  </script>
+  <!-- <body>
+    <div id="main" class="container"> -->
+    {% block body %}
+      <div id="main">
+      <div class="card text-center text-white border-dark bg-dark mb-3" >
+        <div class="card-body">
+          <h1>Quality Control Module</h1>
+        </div>
+      </div>
+      <a href="/logout">Logout</a>
+      <hr class="my-4">
+      <div class="row">
+        <div class="col-md-3">
+        </div>
+        <div class="col-md-6">
+          <form>
+            <div class="form-group">
+              <label for="recording_id">Recording ID</label> 
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <div class="input-group-text">
+                    <i class="fa fa-database"></i>
+                  </div>
+                </div> 
+                <input id="recording_id" name="recording_id" type="text" class="form-control">
+              </div>
+            </div> 
+            <div class="form-group">
+              <button name="lookup" id="lookup" type="button" class="btn btn-primary">Look up</button>
+            </div>
+          </form>  
+
+          <div id="audio_controls_div" class="col-md-6">
+          </div>
+        </div>
+        <hr class="my-4">
+        <div class="col-md-3">
+        </div>
+      <hr class="my-4">
+      </div>
+      <!-- CARD START -->
+      <div class="row">
+        <div class="col-xs-12 col-md-9"> <!-- FORM COL -->
+          <form>
+            <div class="form-group row">
+              <label for="lead_id" class="col-4 col-form-label">Lead id</label> 
+              <div class="col-8">
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <div class="input-group-text">
+                      <i class="fa fa-folder-open"></i>
+                    </div>
+                  </div> 
+                  <input id="lead_id" name="lead_id" type="text" class="form-control" readonly="">
+                </div>
+              </div>
+            </div>
+            <div class="form-group row">
+              <label for="qc_specialist" class="col-4 col-form-label">QC Specialist</label> 
+              <div class="col-8">
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <div class="input-group-text">
+                      <i class="fa fa fa-user-circle-o"></i>
+                    </div>
+                  </div> 
+                  <input id="qc_specialist" name="qc_specialist" type="text" class="form-control" value="{{ username }}" readonly>
+                </div>
+              </div>
+            </div>
+            <div class="form-group row">
+              <label for="evalulation_start_time" class="col-4 col-form-label">Evaluation Time</label> 
+              <div class="col-8">
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <div class="input-group-text">
+                      <i class="fa fa-clock-o"></i>
+                    </div>
+                  </div> 
+                  <input id="evalulation_start_time" name="evalulation_start_time" type="text" class="form-control" readonly>
+                </div>
+              </div>
+            </div>
+            <div class="form-group row">
+              <label for="sales_agent" class="col-4 col-form-label">Sales Agent</label> 
+              <div class="col-8">
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <div class="input-group-text">
+                      <i class="fa fa-address-book"></i>
+                    </div>
+                  </div> 
+                  <input id="sales_agent" name="sales_agent" type="text" class="form-control" readonly>
+                </div>
+              </div>
+            </div>
+            <div class="form-group row">
+              <label for="call_datetime" class="col-4 col-form-label">Call datetime</label> 
+              <div class="col-8">
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <div class="input-group-text">
+                      <i class="fa fa-calendar"></i>
+                    </div>
+                  </div> 
+                  <input id="call_datetime" name="call_datetime" type="text" class="form-control" readonly>
+                </div>
+              </div>
+            </div>
+            <div class="form-group row">
+              <label for="customer_first_name" class="col-4 col-form-label">Customer Firstname</label> 
+              <div class="col-8">
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <div class="input-group-text">
+                      <i class="fa fa-address-card-o"></i>
+                    </div>
+                  </div> 
+                  <input id="customer_first_name" name="customer_first_name" type="text" class="form-control" readonly>
+                </div>
+              </div>
+            </div>
+            <div class="form-group row">
+              <label for="customer_last_name" class="col-4 col-form-label">Customer Lastname</label> 
+              <div class="col-8">
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <div class="input-group-text">
+                      <i class="fa fa-address-card-o"></i>
+                    </div>
+                  </div> 
+                  <div class="bg-warning text-dark">
+                  <input id="customer_last_name" name="customer_last_name" type="text" class="form-control" readonly>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="form-group row">
+              <label for="customer_phone" class="col-4 col-form-label">Customer Phone</label> 
+              <div class="col-8">
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <div class="input-group-text">
+                      <i class="fa fa-phone"></i>
+                    </div>
+                  </div> 
+                  <input id="customer_phone" name="customer_phone" type="text" class="form-control" readonly>
+                </div>
+              </div>
+            </div>
+            <div class="form-group row">
+              <label class="col-4 col-form-label">Call skills</label> 
+              <div class="col-8">
+                <div class="custom-controls-stacked">
+                  <div class="custom-control custom-checkbox">
+                    <input name="call_skills_checks" id="call_skills_checks_0" type="checkbox"  class="custom-control-input" value="YES" aria-describedby="call_skills_checksHelpBlock"> 
+                    <label for="call_skills_checks_0" class="custom-control-label">Intro/Compliment/Risk/Build Rapport</label>
+                  </div>
+                </div>
+                <div class="custom-controls-stacked">
+                  <div class="custom-control custom-checkbox">
+                    <input name="call_skills_checks" id="call_skills_checks_1" type="checkbox"  class="custom-control-input" value="YES" aria-describedby="call_skills_checksHelpBlock"> 
+                    <label for="call_skills_checks_1" class="custom-control-label">Pitched Correct Policy</label>
+                  </div>
+                </div>
+                <div class="custom-controls-stacked">
+                  <div class="custom-control custom-checkbox">
+                    <input name="call_skills_checks" id="call_skills_checks_2" type="checkbox"  class="custom-control-input" value="YES" aria-describedby="call_skills_checksHelpBlock"> 
+                    <label for="call_skills_checks_2" class="custom-control-label">Went over Deductible</label>
+                  </div>
+                </div>
+                <div class="custom-controls-stacked">
+                  <div class="custom-control custom-checkbox">
+                    <input name="call_skills_checks" id="call_skills_checks_3" type="checkbox"  class="custom-control-input" value="YES" aria-describedby="call_skills_checksHelpBlock"> 
+                    <label for="call_skills_checks_3" class="custom-control-label">Additional Benefits</label>
+                  </div>
+                </div>
+                <div class="custom-controls-stacked">
+                  <div class="custom-control custom-checkbox">
+                    <input name="call_skills_checks" id="call_skills_checks_4" type="checkbox"  class="custom-control-input" value="YES" aria-describedby="call_skills_checksHelpBlock"> 
+                    <label for="call_skills_checks_4" class="custom-control-label">Gave Pricing</label>
+                  </div>
+                </div>
+                <div class="custom-controls-stacked">
+                  <div class="custom-control custom-checkbox">
+                    <input name="call_skills_checks" id="call_skills_checks_5" type="checkbox" class="custom-control-input" value="YES" aria-describedby="call_skills_checksHelpBlock"> 
+                    <label for="call_skills_checks_5" class="custom-control-label">Drop</label>
+                  </div>
+                </div>
+                <div class="custom-controls-stacked">
+                  <div class="custom-control custom-checkbox">
+                    <input name="call_skills_checks" id="call_skills_checks_6" type="checkbox"  class="custom-control-input" value="YES" aria-describedby="call_skills_checksHelpBlock"> 
+                    <label for="call_skills_checks_6" class="custom-control-label">Asked for money with confidence</label>
+                  </div>
+                </div>
+                <div class="custom-controls-stacked">
+                  <div class="custom-control custom-checkbox">
+                    <input name="call_skills_checks" id="call_skills_checks_7" type="checkbox"  class="custom-control-input" value="YES" aria-describedby="call_skills_checksHelpBlock"> 
+                    <label for="call_skills_checks_7" class="custom-control-label">Gave a 2-option close</label>
+                  </div>
+                </div>
+                <div class="custom-controls-stacked">
+                  <div class="custom-control custom-checkbox">
+                    <input name="call_skills_checks" id="call_skills_checks_8" type="checkbox"  class="custom-control-input" value="YES" aria-describedby="call_skills_checksHelpBlock"> 
+                    <label for="call_skills_checks_8" class="custom-control-label">Kept silent after asking for $</label>
+                  </div>
+                </div>
+                <div class="custom-controls-stacked">
+                  <div class="custom-control custom-checkbox">
+                    <input name="call_skills_checks" id="call_skills_checks_9" type="checkbox"  class="custom-control-input" value="YES" aria-describedby="call_skills_checksHelpBlock"> 
+                    <label for="call_skills_checks_9" class="custom-control-label">Overcame objection with reubuttal / story / value building</label>
+                  </div>
+                </div>
+                <div class="custom-controls-stacked">
+                  <div class="custom-control custom-checkbox">
+                    <input name="call_skills_checks" id="call_skills_checks_10" type="checkbox"  class="custom-control-input" value="YES" aria-describedby="call_skills_checksHelpBlock"> 
+                    <label for="call_skills_checks_10" class="custom-control-label">Tie Down</label>
+                  </div>
+                </div>
+                <div class="custom-controls-stacked">
+                  <div class="custom-control custom-checkbox">
+                    <input name="call_skills_checks" id="call_skills_checks_11" type="checkbox"  class="custom-control-input" value="YES" aria-describedby="call_skills_checksHelpBlock"> 
+                    <label for="call_skills_checks_11" class="custom-control-label">Drop / easypay / (Matrix 1 YR Maintenance Package)</label>
+                  </div>
+                </div>
+                <div class="custom-controls-stacked">
+                  <div class="custom-control custom-checkbox">
+                    <input name="call_skills_checks" id="call_skills_checks_12" type="checkbox"  class="custom-control-input" value="YES" aria-describedby="call_skills_checksHelpBlock"> 
+                    <label for="call_skills_checks_12" class="custom-control-label">Asked for money with confidence</label>
+                  </div>
+                </div>
+                <div class="custom-controls-stacked">
+                  <div class="custom-control custom-checkbox">
+                    <input name="call_skills_checks" id="call_skills_checks_13" type="checkbox" class="custom-control-input" value="YES"  aria-describedby="call_skills_checksHelpBlock"> 
+                    <label for="call_skills_checks_13" class="custom-control-label">Kept silent after asking for money</label>
+                  </div>
+                </div>
+                <div class="custom-controls-stacked">
+                  <div class="custom-control custom-checkbox">
+                    <input name="call_skills_checks" id="call_skills_checks_14" type="checkbox" class="custom-control-input" value="YES"  aria-describedby="call_skills_checksHelpBlock"> 
+                    <label for="call_skills_checks_14" class="custom-control-label">Rinse and Repeat</label>
+                  </div>
+                </div> 
+                <span id="call_skills_checksHelpBlock" class="form-text text-muted">Check all the above boxes the sales agent covered</span>
+              </div>
+            </div>
+            <div class="form-group row">
+              <label class="col-4">Active Listening</label> 
+              <div class="col-8">
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="active_listening_score" id="active_listening_score_0" type="radio" class="custom-control-input" value="1"> 
+                  <label for="active_listening_score_0" class="custom-control-label">1</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="active_listening_score" id="active_listening_score_1" type="radio" class="custom-control-input" value="2"> 
+                  <label for="active_listening_score_1" class="custom-control-label">2</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="active_listening_score" id="active_listening_score_2" type="radio" class="custom-control-input" value="3"> 
+                  <label for="active_listening_score_2" class="custom-control-label">3</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="active_listening_score" id="active_listening_score_3" type="radio" class="custom-control-input" value="4"> 
+                  <label for="active_listening_score_3" class="custom-control-label">4</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="active_listening_score" id="active_listening_score_4" type="radio" class="custom-control-input" value="5"> 
+                  <label for="active_listening_score_4" class="custom-control-label">5</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="active_listening_score" id="active_listening_score_5" type="radio" class="custom-control-input" value="6"> 
+                  <label for="active_listening_score_5" class="custom-control-label">6</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="active_listening_score" id="active_listening_score_6" type="radio" class="custom-control-input" value="7"> 
+                  <label for="active_listening_score_6" class="custom-control-label">7</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="active_listening_score" id="active_listening_score_7" type="radio" class="custom-control-input" value="8"> 
+                  <label for="active_listening_score_7" class="custom-control-label">8</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="active_listening_score" id="active_listening_score_8" type="radio" class="custom-control-input" value="9"> 
+                  <label for="active_listening_score_8" class="custom-control-label">9</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="active_listening_score" id="active_listening_score_9" type="radio" class="custom-control-input" value="10"> 
+                  <label for="active_listening_score_9" class="custom-control-label">10</label>
+                </div>
+              </div>
+            </div>
+            <div class="form-group row">
+              <label class="col-4">Ethusiasm</label> 
+              <div class="col-8">
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_enthusiasm" id="score_enthusiasm_0" type="radio" class="custom-control-input" value="1"> 
+                  <label for="score_enthusiasm_0" class="custom-control-label">1</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_enthusiasm" id="score_enthusiasm_1" type="radio" class="custom-control-input" value="2"> 
+                  <label for="score_enthusiasm_1" class="custom-control-label">2</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_enthusiasm" id="score_enthusiasm_2" type="radio" class="custom-control-input" value="3"> 
+                  <label for="score_enthusiasm_2" class="custom-control-label">3</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_enthusiasm" id="score_enthusiasm_3" type="radio" class="custom-control-input" value="4"> 
+                  <label for="score_enthusiasm_3" class="custom-control-label">4</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_enthusiasm" id="score_enthusiasm_4" type="radio" class="custom-control-input" value="5"> 
+                  <label for="score_enthusiasm_4" class="custom-control-label">5</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_enthusiasm" id="score_enthusiasm_5" type="radio" class="custom-control-input" value="6"> 
+                  <label for="score_enthusiasm_5" class="custom-control-label">6</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_enthusiasm" id="score_enthusiasm_6" type="radio" class="custom-control-input" value="7"> 
+                  <label for="score_enthusiasm_6" class="custom-control-label">7</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_enthusiasm" id="score_enthusiasm_7" type="radio" class="custom-control-input" value="8"> 
+                  <label for="score_enthusiasm_7" class="custom-control-label">8</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_enthusiasm" id="score_enthusiasm_8" type="radio" class="custom-control-input" value="9"> 
+                  <label for="score_enthusiasm_8" class="custom-control-label">9</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_enthusiasm" id="score_enthusiasm_9" type="radio" class="custom-control-input" value="10"> 
+                  <label for="score_enthusiasm_9" class="custom-control-label">10</label>
+                </div>
+              </div>
+            </div>
+            <div class="form-group row">
+              <label class="col-4">Relate</label> 
+              <div class="col-8">
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_relate" id="score_relate_0" type="radio" class="custom-control-input" value="1"> 
+                  <label for="score_relate_0" class="custom-control-label">1</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_relate" id="score_relate_1" type="radio" class="custom-control-input" value="2"> 
+                  <label for="score_relate_1" class="custom-control-label">2</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_relate" id="score_relate_2" type="radio" class="custom-control-input" value="3"> 
+                  <label for="score_relate_2" class="custom-control-label">3</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_relate" id="score_relate_3" type="radio" class="custom-control-input" value="4"> 
+                  <label for="score_relate_3" class="custom-control-label">4</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_relate" id="score_relate_4" type="radio" class="custom-control-input" value="5"> 
+                  <label for="score_relate_4" class="custom-control-label">5</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_relate" id="score_relate_5" type="radio" class="custom-control-input" value="6"> 
+                  <label for="score_relate_5" class="custom-control-label">6</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_relate" id="score_relate_6" type="radio" class="custom-control-input" value="7"> 
+                  <label for="score_relate_6" class="custom-control-label">7</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_relate" id="score_relate_7" type="radio" class="custom-control-input" value="8"> 
+                  <label for="score_relate_7" class="custom-control-label">8</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_relate" id="score_relate_8" type="radio" class="custom-control-input" value="9"> 
+                  <label for="score_relate_8" class="custom-control-label">9</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_relate" id="score_relate_9" type="radio" class="custom-control-input" value="10"> 
+                  <label for="score_relate_9" class="custom-control-label">10</label>
+                </div>
+              </div>
+            </div>
+            <div class="form-group row">
+              <label class="col-4">Risk</label> 
+              <div class="col-8">
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_risk" id="score_risk_0" type="radio" class="custom-control-input" value="1"> 
+                  <label for="score_risk_0" class="custom-control-label">1</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_risk" id="score_risk_1" type="radio" class="custom-control-input" value="2"> 
+                  <label for="score_risk_1" class="custom-control-label">2</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_risk" id="score_risk_2" type="radio" class="custom-control-input" value="3"> 
+                  <label for="score_risk_2" class="custom-control-label">3</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_risk" id="score_risk_3" type="radio" class="custom-control-input" value="4"> 
+                  <label for="score_risk_3" class="custom-control-label">4</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_risk" id="score_risk_4" type="radio" class="custom-control-input" value="5"> 
+                  <label for="score_risk_4" class="custom-control-label">5</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_risk" id="score_risk_5" type="radio" class="custom-control-input" value="6"> 
+                  <label for="score_risk_5" class="custom-control-label">6</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_risk" id="score_risk_6" type="radio" class="custom-control-input" value="7"> 
+                  <label for="score_risk_6" class="custom-control-label">7</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_risk" id="score_risk_7" type="radio" class="custom-control-input" value="8"> 
+                  <label for="score_risk_7" class="custom-control-label">8</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_risk" id="score_risk_8" type="radio" class="custom-control-input" value="9"> 
+                  <label for="score_risk_8" class="custom-control-label">9</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_risk" id="score_risk_9" type="radio" class="custom-control-input" value="10"> 
+                  <label for="score_risk_9" class="custom-control-label">10</label>
+                </div>
+              </div>
+            </div>
+            <div class="form-group row">
+              <label class="col-4">Reassure</label> 
+              <div class="col-8">
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_reassure" id="score_reassure_0" type="radio" class="custom-control-input" value="1"> 
+                  <label for="score_reassure_0" class="custom-control-label">1</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_reassure" id="score_reassure_1" type="radio" class="custom-control-input" value="2"> 
+                  <label for="score_reassure_1" class="custom-control-label">2</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_reassure" id="score_reassure_2" type="radio" class="custom-control-input" value="3"> 
+                  <label for="score_reassure_2" class="custom-control-label">3</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_reassure" id="score_reassure_3" type="radio" class="custom-control-input" value="4"> 
+                  <label for="score_reassure_3" class="custom-control-label">4</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_reassure" id="score_reassure_4" type="radio" class="custom-control-input" value="5"> 
+                  <label for="score_reassure_4" class="custom-control-label">5</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_reassure" id="score_reassure_5" type="radio" class="custom-control-input" value="6"> 
+                  <label for="score_reassure_5" class="custom-control-label">6</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_reassure" id="score_reassure_6" type="radio" class="custom-control-input" value="7"> 
+                  <label for="score_reassure_6" class="custom-control-label">7</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_reassure" id="score_reassure_7" type="radio" class="custom-control-input" value="8"> 
+                  <label for="score_reassure_7" class="custom-control-label">8</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_reassure" id="score_reassure_8" type="radio" class="custom-control-input" value="9"> 
+                  <label for="score_reassure_8" class="custom-control-label">9</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_reassure" id="score_reassure_9" type="radio" class="custom-control-input" value="10"> 
+                  <label for="score_reassure_9" class="custom-control-label">10</label>
+                </div>
+              </div>
+            </div>
+            <div class="form-group row">
+              <label class="col-4">Tempo</label> 
+              <div class="col-8">
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_tempo" id="score_tempo_0" type="radio" class="custom-control-input" value="1"> 
+                  <label for="score_tempo_0" class="custom-control-label">1</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_tempo" id="score_tempo_1" type="radio" class="custom-control-input" value="2"> 
+                  <label for="score_tempo_1" class="custom-control-label">2</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_tempo" id="score_tempo_2" type="radio" class="custom-control-input" value="3"> 
+                  <label for="score_tempo_2" class="custom-control-label">3</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_tempo" id="score_tempo_3" type="radio" class="custom-control-input" value="4"> 
+                  <label for="score_tempo_3" class="custom-control-label">4</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_tempo" id="score_tempo_4" type="radio" class="custom-control-input" value="5"> 
+                  <label for="score_tempo_4" class="custom-control-label">5</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_tempo" id="score_tempo_5" type="radio" class="custom-control-input" value="6"> 
+                  <label for="score_tempo_5" class="custom-control-label">6</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_tempo" id="score_tempo_6" type="radio" class="custom-control-input" value="7"> 
+                  <label for="score_tempo_6" class="custom-control-label">7</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_tempo" id="score_tempo_7" type="radio" class="custom-control-input" value="8"> 
+                  <label for="score_tempo_7" class="custom-control-label">8</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_tempo" id="score_tempo_8" type="radio" class="custom-control-input" value="9"> 
+                  <label for="score_tempo_8" class="custom-control-label">9</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_tempo" id="score_tempo_9" type="radio" class="custom-control-input" value="10"> 
+                  <label for="score_tempo_9" class="custom-control-label">10</label>
+                </div>
+              </div>
+            </div>
+            <div class="form-group row">
+              <label class="col-4">Persistence</label> 
+              <div class="col-8">
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_persistence" id="score_persistence_0" type="radio" class="custom-control-input" value="1"> 
+                  <label for="score_persistence_0" class="custom-control-label">1</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_persistence" id="score_persistence_1" type="radio" class="custom-control-input" value="2"> 
+                  <label for="score_persistence_1" class="custom-control-label">2</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_persistence" id="score_persistence_2" type="radio" class="custom-control-input" value="3"> 
+                  <label for="score_persistence_2" class="custom-control-label">3</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_persistence" id="score_persistence_3" type="radio" class="custom-control-input" value="4"> 
+                  <label for="score_persistence_3" class="custom-control-label">4</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_persistence" id="score_persistence_4" type="radio" class="custom-control-input" value="5"> 
+                  <label for="score_persistence_4" class="custom-control-label">5</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_persistence" id="score_persistence_5" type="radio" class="custom-control-input" value="6"> 
+                  <label for="score_persistence_5" class="custom-control-label">6</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_persistence" id="score_persistence_6" type="radio" class="custom-control-input" value="7"> 
+                  <label for="score_persistence_6" class="custom-control-label">7</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_persistence" id="score_persistence_7" type="radio" class="custom-control-input" value="8"> 
+                  <label for="score_persistence_7" class="custom-control-label">8</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_persistence" id="score_persistence_8" type="radio" class="custom-control-input" value="9"> 
+                  <label for="score_persistence_8" class="custom-control-label">9</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_persistence" id="score_persistence_9" type="radio" class="custom-control-input" value="10"> 
+                  <label for="score_persistence_9" class="custom-control-label">10</label>
+                </div>
+              </div>
+            </div>
+            <div class="form-group row">
+              <label class="col-4">Product knowledge</label> 
+              <div class="col-8">
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_product_knowledge" id="score_product_knowledge_0" type="radio" class="custom-control-input" value="1"> 
+                  <label for="score_product_knowledge_0" class="custom-control-label">1</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_product_knowledge" id="score_product_knowledge_1" type="radio" class="custom-control-input" value="2"> 
+                  <label for="score_product_knowledge_1" class="custom-control-label">2</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_product_knowledge" id="score_product_knowledge_2" type="radio" class="custom-control-input" value="3"> 
+                  <label for="score_product_knowledge_2" class="custom-control-label">3</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_product_knowledge" id="score_product_knowledge_3" type="radio" class="custom-control-input" value="4"> 
+                  <label for="score_product_knowledge_3" class="custom-control-label">4</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_product_knowledge" id="score_product_knowledge_4" type="radio" class="custom-control-input" value="5"> 
+                  <label for="score_product_knowledge_4" class="custom-control-label">5</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_product_knowledge" id="score_product_knowledge_5" type="radio" class="custom-control-input" value="6"> 
+                  <label for="score_product_knowledge_5" class="custom-control-label">6</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_product_knowledge" id="score_product_knowledge_6" type="radio" class="custom-control-input" value="7"> 
+                  <label for="score_product_knowledge_6" class="custom-control-label">7</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_product_knowledge" id="score_product_knowledge_7" type="radio" class="custom-control-input" value="8" > 
+                  <label for="score_product_knowledge_7" class="custom-control-label">8</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_product_knowledge" id="score_product_knowledge_8" type="radio" class="custom-control-input" value="9"> 
+                  <label for="score_product_knowledge_8" class="custom-control-label">9</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_product_knowledge" id="score_product_knowledge_9" type="radio" class="custom-control-input" value="10"> 
+                  <label for="score_product_knowledge_9" class="custom-control-label">10</label>
+                </div>
+              </div>
+            </div>
+            <div class="form-group row">
+              <label class="col-4">Confidence</label> 
+              <div class="col-8">
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_confidence" id="score_confidence_0" type="radio" class="custom-control-input" value="1"> 
+                  <label for="score_confidence_0" class="custom-control-label">1</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_confidence" id="score_confidence_1" type="radio" class="custom-control-input" value="2"> 
+                  <label for="score_confidence_1" class="custom-control-label">2</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_confidence" id="score_confidence_2" type="radio" class="custom-control-input" value="3"> 
+                  <label for="score_confidence_2" class="custom-control-label">3</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_confidence" id="score_confidence_3" type="radio" class="custom-control-input" value="4"> 
+                  <label for="score_confidence_3" class="custom-control-label">4</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_confidence" id="score_confidence_4" type="radio" class="custom-control-input" value="5"> 
+                  <label for="score_confidence_4" class="custom-control-label">5</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_confidence" id="score_confidence_5" type="radio" class="custom-control-input" value="6"> 
+                  <label for="score_confidence_5" class="custom-control-label">6</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_confidence" id="score_confidence_6" type="radio" class="custom-control-input" value="7"> 
+                  <label for="score_confidence_6" class="custom-control-label">7</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_confidence" id="score_confidence_7" type="radio" class="custom-control-input" value="8"> 
+                  <label for="score_confidence_7" class="custom-control-label">8</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_confidence" id="score_confidence_8" type="radio" class="custom-control-input" value="9"> 
+                  <label for="score_confidence_8" class="custom-control-label">9</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                  <input name="score_confidence" id="score_confidence_9" type="radio" class="custom-control-input" value="10"> 
+                  <label for="score_confidence_9" class="custom-control-label">10</label>
+                </div>
+              </div>
+            </div>
+            <div class="form-group row">
+              <label for="total_score" class="col-4 col-form-label">Total Score</label> 
+              <div class="col-8">
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <div class="input-group-text">
+                      <i class="fa fa-signal"></i>
+                    </div>
+                  </div> 
+                  <input id="total_score" name="total_score" type="text" class="form-control">
+                </div>
+              </div>
+            </div>
+            <div class="form-group row">
+              <label for="recording_url" class="col-2 col-form-label">URL</label> 
+              <div class="col-10">
+                <input id="recording_url" name="recording_url" type="text" class="form-control" readonly>    
+              </div>
+            </div> 
+            <div class="form-group row">
+              <label for="additional_comments" class="col-4 col-form-label">Comments</label> 
+              <div class="col-8">
+                <textarea id="additional_comments" name="additional_comments" cols="40" rows="8" class="form-control"></textarea>
+              </div>
+            </div> 
+            <div class="form-group row">
+              <label for="signature" class="col-4 col-form-label">Employee Signature</label> 
+              <div class="col-8">
+                <textarea id="signature" name="signature" cols="40" rows="1" class="form-control"></textarea>
+              </div>
+            </div> 
+            <div class="form-group row">
+              <div class="offset-4 col-8">
+                <button name="submit" type="submit" class="btn btn-primary">Submit</button>
+              </div>
+            </div>
+            <div class="form-group row">
+              <div class="offset-4 col-8">
+                <button name="save_as_pdf" id="save_as_pdf" type="button" class="btn btn-danger">Save as PDF</button>
+              </div>
+            </div>
+          </form>
+            
+        </div>
+      </div>  
+    </div>
+    {% endblock %}
+    <!--
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" crossorigin="anonymous"></script>
+  </body>
+</html>
+-->
